@@ -1,17 +1,17 @@
 {
   "manifestVersion": 1,
-  "id": "custom_card_queue",
-  "name": "Custom Card Queue",
-  "author": "Elias Cherz",
-  "repoUrl": "https://github.com/eliascherz/remnote-custom-card-queue",
+  "id": "EliaScherz-InDueOrderplugin",
+  "name": "In Due Order",
+  "author": "Elia Scherz",
+  "repoUrl": "https://github.com/eosinophobe/InDueOrder.git",
   "version": {
     "major": 0,
-    "minor": 1,
-    "patch": 2
+    "minor": 0,
+    "patch": 1
   },
   "theme": [],
   "enableOnMobile": false,
-  "description": "Load every card from a chosen Rem, inspect the card IDs, and review them inside a controlled custom queue.",
+  "description": "Practice all due cards in order",
   "requestNative": false,
   "requiredScopes": [
     {
