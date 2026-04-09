@@ -1,0 +1,22 @@
+{
+  "manifestVersion": 1,
+  "id": "custom_card_queue",
+  "name": "Custom Card Queue",
+  "author": "Elias Cherz",
+  "repoUrl": "https://github.com/eliascherz/remnote-custom-card-queue",
+  "version": {
+    "major": 0,
+    "minor": 1,
+    "patch": 2
+  },
+  "theme": [],
+  "enableOnMobile": false,
+  "description": "Load every card from a chosen Rem, inspect the card IDs, and review them inside a controlled custom queue.",
+  "requestNative": false,
+  "requiredScopes": [
+    {
+      "type": "All",
+      "level": "ReadCreateModify"
+    }
+  ]
+}
