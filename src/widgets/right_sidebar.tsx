@@ -71,6 +71,18 @@ function truncateText(text: string, maxLength: number) {
   return `${text.slice(0, maxLength)}...`;
 }
 
+async function safeRichTextToString(plugin: ReturnType<typeof usePlugin>, richText: unknown) {
+  if (!richText) {
+    return '';
+  }
+
+  try {
+    return await plugin.richText.toString(richText as any);
+  } catch {
+    return '';
+  }
+}
+
 class QueueErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; message: string }
@@ -130,7 +142,7 @@ export const CustomQueueWidget = () => {
           setActiveRemText(null);
           return;
         }
-        const text = rem.text ? await plugin.richText.toString(rem.text) : '';
+        const text = await safeRichTextToString(plugin, rem.text);
         if (!cancelled) setActiveRemText(text);
       }
       fetchRemText();
@@ -697,6 +709,7 @@ export const CustomQueueWidget = () => {
           throw new Error('Rem not found or not accessible with the current plugin scope.');
         }
 
+        await rem.isDocument();
         const orderedRems = await rem.allRemInDocumentOrPortal();
         const remsInDocumentOrder = orderedRems.length > 0 ? orderedRems : [rem];
 
@@ -704,12 +717,9 @@ export const CustomQueueWidget = () => {
 
         for (const currentRem of remsInDocumentOrder) {
           const currentCards = await currentRem.getCards();
-          const remText = currentRem.text
-            ? await plugin.richText.toString(currentRem.text)
-            : '';
-          const remBackText = currentRem.backText
-            ? await plugin.richText.toString(currentRem.backText)
-            : undefined;
+          const remText = await safeRichTextToString(plugin, currentRem.text);
+          const remBackTextRaw = await safeRichTextToString(plugin, currentRem.backText);
+          const remBackText = remBackTextRaw || undefined;
 
           for (const card of currentCards) {
             if (loadedCardById.has(card._id)) {
@@ -728,6 +738,8 @@ export const CustomQueueWidget = () => {
         }
 
         const loadedCards = Array.from(loadedCardById.values());
+        const dueCardCount = loadedCards.filter((card) => isCardDue(card.nextRepetitionTime)).length;
+        const traversalPreview = remsInDocumentOrder.slice(0, 8).map((currentRem) => currentRem._id);
 
         if (cancelled) {
           return;
