@@ -14,6 +14,14 @@ const QUEUE_CSS_BASE_RULE = `canvas {
   display: none !important;
 }
 
+.rn-queue-container{
+    background-color: white !important;
+    }
+
+[data-test="Popup Background"] {
+  background-color: white !important
+}
+
 .queue-message:has([data-test="Queue Message Heading"]) * {
   color: white !important;
   background-color: white !important;
@@ -36,17 +44,13 @@ button[data-test="Button With Label: Create More Flashcards"] {
   border-color: white !important
 }
 
-.rn-queue-container{
-    background-color: white !important;
-    }
-
-[data-test="Popup Background"] {
-  background-color: white !important
-}
-
 .rn-queue__card-counter .queue__count {
   color: transparent; /* hide the "1" */
   position: relative;
+}
+
+.rn-queue__card-counter {
+  background-color: white !important;
 }
 
 .rn-queue__card-counter .queue__count::after {
@@ -55,10 +59,6 @@ button[data-test="Button With Label: Create More Flashcards"] {
   position: absolute;
   left: 0;
   top: 0;
-}
-  button[data-test="accuracy-button-0.01"] {
-  pointer-events: none;
-  opacity: 0.5;
 }
 
 [data-test="Queue Back Button"] {
@@ -169,65 +169,6 @@ async function onActivate(plugin: ReactRNPlugin) {
   queueCompletionPopupInterval = window.setInterval(() => {
     void maybeOpenCompletionPopup();
   }, 100);
-
-  await plugin.settings.registerStringSetting({
-    id: 'default-rem-id',
-    title: 'Default Rem ID',
-    defaultValue: '',
-  });
-
-  await plugin.settings.registerBooleanSetting({
-    id: 'autoload-focused-rem',
-    title: 'Autoload Focused Rem On Open',
-    defaultValue: true,
-  });
-
-  await plugin.app.registerCommand({
-    id: 'load-focused-rem-into-custom-queue',
-    name: 'Load Focused Rem Into Custom Queue',
-    action: async () => {
-      const focusedRem = await plugin.focus.getFocusedRem();
-
-      if (!focusedRem) {
-        await plugin.app.toast('No focused Rem found.');
-        return;
-      }
-
-      await plugin.storage.setSynced('default-rem-id', focusedRem._id);
-      await plugin.app.toast('Focused Rem saved for the custom queue.');
-    },
-  });
-
-  await plugin.app.registerCommand({
-    id: 'start-custom-queue',
-    name: 'Start Custom Queue',
-    action: async () => {
-      const focusedRem = await plugin.focus.getFocusedRem();
-
-      if (!focusedRem) {
-        await plugin.app.toast('Place your cursor inside a Rem first, then run this command.');
-        return;
-      }
-
-      const remCards = await focusedRem.getCards();
-
-      if (!remCards || remCards.length === 0) {
-        await plugin.app.toast('No cards found for that Rem.');
-        return;
-      }
-
-      const dueCards = remCards.filter((c: any) => isCardDue(c.nextRepetitionTime));
-      if (dueCards.length === 0) {
-        await plugin.app.toast('No due cards found for that Rem.');
-        return;
-      }
-
-      const cardIds = dueCards.map((c: any) => c._id);
-      await plugin.storage.setSynced('manual-queue-card-ids-json', JSON.stringify(cardIds));
-      await plugin.storage.setSynced('queue-should-start', 'true');
-      await plugin.app.toast(`Starting queue with ${cardIds.length} due card${cardIds.length === 1 ? '' : 's'}…`);
-    },
-  });
 
   await plugin.app.registerWidget('right_sidebar', WidgetLocation.RightSidebar, {
     dimensions: { height: 900, width: '100%' },

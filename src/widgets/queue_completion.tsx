@@ -29,25 +29,44 @@ const QueueCompletionWidget = () => {
         setLoading(false);
       }
     })();
-    // Start heartbeat for queue_completion
+
     const pushHeartbeat = () => {
       if (document.visibilityState !== 'visible') return;
+
+      const now = String(Date.now());
+
+      void plugin.storage.setSynced('custom-queue-popup-heartbeat', now);
       void plugin.storage.setSynced('custom-queue-completion-popup-heartbeat', String(Date.now()));
     };
+
     pushHeartbeat();
+    void plugin.storage.setSynced('custom-queue-css-enabled', 'true');
+
+    const cssRetryTimer = window.setTimeout(() => {
+      void plugin.storage.setSynced('custom-queue-css-enabled', 'true');
+    }, 500);
+
     const heartbeatInterval = window.setInterval(pushHeartbeat, 1000);
+
     const onVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
+        void plugin.storage.setSynced('custom-queue-popup-heartbeat', '0');
         void plugin.storage.setSynced('custom-queue-completion-popup-heartbeat', '0');
         return;
       }
+
       pushHeartbeat();
     };
+
     document.addEventListener('visibilitychange', onVisibilityChange);
+
     return () => {
+      window.clearTimeout(cssRetryTimer);
       window.clearInterval(heartbeatInterval);
       document.removeEventListener('visibilitychange', onVisibilityChange);
+      void plugin.storage.setSynced('custom-queue-popup-heartbeat', '0');
       void plugin.storage.setSynced('custom-queue-completion-popup-heartbeat', '0');
+      void plugin.storage.setSynced('custom-queue-css-enabled', 'false');
     };
   }, [plugin]);
 
@@ -129,7 +148,18 @@ const QueueCompletionWidget = () => {
               </div>
             </>
           ) : (
-            <div className="text-slate-700 text-lg">All done!</div>
+            <div className="flex flex-col items-center gap-3">
+              <div className="text-slate-700 text-lg">All done!</div>
+              <button
+                className="rounded-md px-3 py-2 text-sm font-medium"
+                style={{ backgroundColor: '#104862', color: 'white', opacity: 1, visibility: 'visible', pointerEvents: 'auto' }}
+                onClick={handleNo}
+                disabled={loading}
+                type="button"
+              >
+                Close queue
+              </button>
+            </div>
           )}
         </div>
       </div>
